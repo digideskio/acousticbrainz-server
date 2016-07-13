@@ -167,13 +167,19 @@ def evaluate(dataset_id):
         try:
             if form.filter_type.data == forms.DATASET_EVAL_NO_FILTER:
                 form.filter_type.data = None
-            db.dataset_eval.evaluate_dataset(
-                dataset_id=ds["id"],
-                normalize=form.normalize.data,
-                eval_location=form.evaluation_location.data,
-                filter_type=form.filter_type.data,
-            )
-            flash.info("Dataset %s has been added into evaluation queue." % ds["id"])
+            try:
+                db.dataset_eval.evaluate_dataset(
+                    dataset_id=ds["id"],
+                    normalize=form.normalize.data,
+                    eval_location=form.evaluation_location.data,
+                    filter_type=form.filter_type.data,
+                    challenge_id=form.challenge_id.data,
+                )
+                flash.info("Dataset %s has been added into evaluation queue." % ds["id"])
+            except db.exceptions.BadDataException as e:
+                flash.error("Failed to add dataset into evaluation queue: %s" % e)
+                return render_template("datasets/evaluate.html", dataset=ds, form=form)
+
         except db.dataset_eval.IncompleteDatasetException:
             # TODO(roman): Show more informative error message.
             flash.error("Can't add this dataset into evaluation queue because it's incomplete.")
@@ -334,6 +340,21 @@ def recording_info(mbid):
         })
     except musicbrainz.DataUnavailable as e:
         return jsonify(error=str(e)), 404
+
+
+@datasets_bp.route("/suggest")
+@login_required
+def active():
+    query = request.args.get("q")
+    if not query:
+        raise BadRequest("Query is missing.")
+    datasets = []
+    for dataset in db.dataset.find(query, current_user.id):
+        datasets.append({
+            "id": dataset["id"],
+            "name": dataset["name"],
+        })
+    return jsonify(datasets=datasets)
 
 
 def get_dataset(dataset_id):

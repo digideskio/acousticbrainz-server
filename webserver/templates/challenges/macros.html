@@ -1,0 +1,19 @@
+{% macro challenge_class_list(classes) %}
+  {% for cls in classes %}
+    <span class="label label-info" style="font-size:0.9em;">{{ cls }}</span>
+  {% endfor %}
+{% endmacro %}
+
+{% macro challenge_details(challenge) %}
+  <p>
+    Challenge ID: <code>{{ challenge['id'] }}</code>
+    <br/>Organizer ID: <code>{{ challenge['creator'] }}</code> (created on {{ challenge['created']|datetime }})
+  </p>
+  <h3>Classes</h3>
+  <p>
+    <em>
+      Datasets submitted for this challenge must consist the following classes:
+    </em>
+  </p>
+  {{ challenge_class_list(challenge['classes']) }}
+{% endmacro %}
