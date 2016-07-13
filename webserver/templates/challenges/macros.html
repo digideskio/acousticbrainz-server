@@ -10,10 +10,6 @@
     <br/>Organizer ID: <code>{{ challenge['creator'] }}</code> (created on {{ challenge['created']|datetime }})
   </p>
   <h3>Classes</h3>
-  <p>
-    <em>
-      Datasets submitted for this challenge must consist the following classes:
-    </em>
-  </p>
+  <p>Datasets submitted for this challenge must consist of the following classes:</p>
   {{ challenge_class_list(challenge['classes']) }}
 {% endmacro %}
